@@ -13,7 +13,7 @@ Responsive and Adaptive Infrastructure Materials (Re-AIM) research group (https:
 
 ## Package installed:
   -email API
-  -Beautiful
+  -Beautifulsoup
   -email parser
   -tweepy
   -time
