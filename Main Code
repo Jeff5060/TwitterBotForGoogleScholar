@@ -1,0 +1,138 @@
+#Application: Twitter Bot
+#Author: Haojie Xu
+#Description: Using Python, Twitter Bot automatically turns Google
+# Scholar Alerts from Gmail Inbox into Twitter feeds to keep the public
+# informed of the new discoveries.
+
+import email
+import imaplib
+from bs4 import BeautifulSoup
+import email.parser
+import tweepy
+import time
+
+#Twitter credidential
+CONSUMER_KEY = XXX
+CONSUMER_SECRET = XXX
+ACCESS_KEY = XXX
+ACCESS_SECRET = XXX
+
+#login to Twitter
+auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
+
+#below is the API that talks to Twitter
+api = tweepy.API(auth)
+
+#Gmail credidential
+username = XXX
+password = XXX
+
+TAG = XXX
+
+#While True loop to keep the program running 24/7
+while True:
+
+    #create a imaplib object and login to use functions from the library
+    mail = imaplib.IMAP4_SSL("imap.gmail.com")
+    mail.login(username, password)
+
+    #select the inbox that is labelled with "TAG" tag
+    mail.select("TAG")
+
+    #use the uni function, and pass in the string of the command as the first argument
+    #uid is unique identification for the item, each mail has its unique ID
+    #keyword "ALL" is used to get all results doncumented in RFC3501
+    #keyword "UNSEEN" allows us to check the UNSEEN new emails
+    result, data = mail.uid('search', None, "UNSEEN")
+
+    #split() function splits string at a place, by default is any white space
+    inbox_item_list = data[0].split()
+
+    #if the length of the inbox_item_list bytes array is not zero, it means new mail is contained
+    if(len(inbox_item_list) != 0):
+
+        # [-1] is always the newest email in the inbox_item_list byte array
+        lastest_email_uid = inbox_item_list[-1]
+
+        #fetch the data through RFC882 Protocol
+        result2, data = mail.uid('fetch', lastest_email_uid, '(RFC822)')
+
+        #data is a mime format, can't be used directly as html, utf-9 decoding is required
+        raw_email = data[0][1].decode("utf-8")
+
+        #the following lines check if the raw_email is mutlipart
+        b = email.message_from_string(raw_email)
+        if b.is_multipart():
+            for part in b.walk():
+                ctype = part.get_content_type()
+                cdispo = str(part.get('Content-Disposition'))
+
+        #not multipart, plain text, no attacments
+        else:
+            body = b.get_payload(decode=True)
+
+        #create BeautifulSoup object and pass our email_message into the parameter to work with
+        soup = BeautifulSoup(body, 'lxml')
+
+        #finds all h3 tags in the soup object and store them inside of the variable h3_list
+        h3_list = soup.find_all('h3')
+
+        #create a function that will basically take one h3 article HTML body at a time, and
+        #remove the unwanted characters and lines to get the title only
+        def parse_to_title(article):
+            article = article
+
+            #removes the href link first from the HTML body
+            link = str(article.find('a')['href']).replace('&html=', '')
+
+            #removes HTML style codes
+            str_0 = str(article).replace('style="font-size:17px;color:#1a0dab">', "")
+            str_1 = str_0.replace('<h3 style="font-weight:normal;margin:0;font-size:17px;line-height:20px;"><a class="gse_alrt_title" href="', '')
+            str_2 = str_1.replace('<b>', '')
+            str_3 = str_2.replace('</b>', '')
+            str_4 = str_3.replace('</a>', '')
+            str_5 = str_4.replace('</h3>', '')
+            str_6 = str_5.replace('&amp;html=" ', '')
+            str_7 = str_6.replace('amp;', '')
+            str_8 = str_7.replace(link, '')
+
+            #removes style code for HTML bodies that contain [PDF]
+            str_9 = str_8.replace('<h3 style="font-weight:normal;margin:0;font-size:17px;line-height:20px;"><span style="font-size:11px;font-weight:bold;color:#1a0dab;vertical-align:2px">[PDF]</span> <a class="gse_alrt_title" href="', '')
+
+            #removes style code for HTML bodies that contain [HTML]
+            str_10 = str_9.replace('<h3 style="font-weight:normal;margin:0;font-size:17px;line-height:20px;"><span style="font-size:11px;font-weight:bold;color:#1a0dab;vertical-align:2px">[HTML]</span> <a class="gse_alrt_title" href="', '')
+
+            #unwanted characters are now removed, returning the title string only
+            return str_10
+
+        #tweet_message function will pass the h3_list which contains an array of articles within just one email, and iterate through the list
+        #each iteration contains one article with title and hyperlink attributes, which then are tweeted out
+        def tweet_message(h3_list):
+            h3_list = h3_list
+
+            #there are usually 10 articles in the h3_list array list
+            for x in range(len(h3_list)):
+                url = h3_list[x].find('a')['href']
+
+                #calling our parse_to_title and pass the single article HTML body to get title
+                title = parse_to_title(h3_list[x])
+                message_body = 'New #research on: "' + title + '" has been #published. For more information, please check out: ' + url
+
+                #Tweepy tweet message function
+                api.update_status(message_body)
+                print(message_body)
+                print("tweeted successfully")
+
+                #allows the pause x duration (1x = 1 second) between each tweets so we don't flood the Twitter server
+                time.sleep(14400)
+
+        #calling the tweet function
+        tweet_message(h3_list)
+    
+    #sleep for 24 hours before checking again for new email
+    time.sleep(86400)
+
+
+
+
