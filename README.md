@@ -27,6 +27,8 @@ Responsive and Adaptive Infrastructure Materials (Re-AIM) research group (https:
         -Gmail account setting > Labels > Create new label > Enter a new label name > Nest label under another label if needed >          specify label attributes
   ### -Apply for Twitter Developer Account for access to Twitter API and application token
         - link: https://developer.twitter.com/en/apply-
+  ### -Specify the email inbox tag for TAG attribute
+        -in code where says TAG = XXX, replace XXX with the label created from above step to select that tagged inbox
         
 ## Contribute
 This code can be improved by increasing the time-processing performance. As a suggestion, users are encouraged to contribute by further functionalizing sections of the code. 
