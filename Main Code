@@ -130,8 +130,9 @@ while True:
         #calling the tweet function
         tweet_message(h3_list)
     
-    #sleep for 24 hours before checking again for new email
-    time.sleep(86400)
+    #sleep for 4 hours before checking again for new email or execute the next email, resting prevents program from crashing
+    print("system enters sleep for 4 hours")
+    time.sleep(14400)
 
 
 
