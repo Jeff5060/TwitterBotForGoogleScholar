@@ -2,7 +2,7 @@
 Using Python 3, Twitter Bot automatically turns Google Scholar Alerts from Gmail Inbox into Twitter feeds to keep the public informed of the new discoveries.
 
 ## Author: 
-Haojie Xu (B.S. Architectural Engineering, Re-AIM Undegraduate Researcher, The Pennsylvania State University)
+Haojie Xu (B.S. Architectural Engineering, Re-AIM Undergraduate Researcher, The Pennsylvania State University)
 
 ## Credits
 Juan Pablo Gevaudan, Ph.D., (Architectural Engineering Assistant Professor, Re-AIM PI, The Pennsylvania State University)
